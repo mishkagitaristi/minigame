@@ -1,4 +1,3 @@
-
 import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
@@ -18,9 +17,11 @@ import { GameService } from "../../services/game";
   standalone: true,
 })
 export class GameSettingsComponent implements OnInit {
+  // Inject required services and utilities
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly gameService = inject(GameService);
+  // Form group for game settings
   settingsForm!: FormGroup;
 
   // Default settings constant for reset functionality
@@ -31,11 +32,17 @@ export class GameSettingsComponent implements OnInit {
     gameTime: 60,
   };
 
+  /**
+   * Sets up the form and subscribes to changes
+   */
   ngOnInit(): void {
     this.initForm();
     this.subscribeToFormChanges();
   }
 
+  /**
+   * Initializes the settings form with default values and validators
+   */
   private initForm(): void {
     this.settingsForm = this.fb.group({
       fallingSpeed: [
@@ -57,6 +64,9 @@ export class GameSettingsComponent implements OnInit {
     });
   }
 
+  /**
+   * Subscribes to form changes and updates game settings when valid
+   */
   private subscribeToFormChanges(): void {
     this.settingsForm.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -67,29 +77,55 @@ export class GameSettingsComponent implements OnInit {
       });
   }
 
+  /**
+   * Getter for falling speed form control
+   */
   get fallingSpeed() {
     return this.settingsForm.get("fallingSpeed");
   }
+
+  /**
+   * Getter for falling frequency form control
+   */
   get fallingFrequency() {
     return this.settingsForm.get("fallingFrequency");
   }
+
+  /**
+   * Getter for player speed form control
+   */
   get playerSpeed() {
     return this.settingsForm.get("playerSpeed");
   }
+
+  /**
+   * Getter for game time form control
+   */
   get gameTime() {
     return this.settingsForm.get("gameTime");
   }
 
+  /**
+   * Checks if the form is valid
+   * @returns True if all form controls are valid
+   */
   isFormValid(): boolean {
     return this.settingsForm.valid;
   }
 
+  /**
+   * Handles the start game action
+   * Only starts if the form is valid
+   */
   onStartGame(): void {
     if (this.isFormValid()) {
       this.gameService.startGame();
     }
   }
 
+  /**
+   * Resets the form to default settings
+   */
   resetToDefaults(): void {
     this.settingsForm.patchValue(this.defaultSettings);
     this.settingsForm.markAsUntouched();

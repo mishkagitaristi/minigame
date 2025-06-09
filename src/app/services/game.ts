@@ -16,16 +16,20 @@ import { WebsocketService } from "./websocket";
   providedIn: "root",
 })
 export class GameService {
+  // Inject required services
   private websocketService = inject(WebsocketService);
   private offlineService = inject(OfflineService);
   private scoreboardService = inject(ScoreboardService);
 
+  // Subjects for managing different game loops
   private gameLoopDestroy$ = new Subject<void>();
   private objectSpawnDestroy$ = new Subject<void>();
   private timerDestroy$ = new Subject<void>();
 
+  // Game boundaries
   private gameBounds: GameBounds = { width: 800, height: 600 };
 
+  // Initial game state
   private initialGameState: GameState = {
     isGameRunning: false,
     isGameStarted: false,
@@ -51,9 +55,11 @@ export class GameService {
     },
   };
 
+  // BehaviorSubject to handle game state
   private gameStateSubject = new BehaviorSubject<GameState>(
     this.initialGameState
   );
+  // Public observable for components to subscribe to game state changes
   public gameState$ = this.gameStateSubject.asObservable();
 
   constructor() {
@@ -62,7 +68,9 @@ export class GameService {
   }
 
   /**
-   * Update game settings and restart if necessary
+   * Updates game settings and restarts the game if necessary
+   * This method is called when the user changes game settings
+   * @param settings - The new game settings to apply
    */
   updateSettings(settings: GameSettings): void {
     const currentState = this.gameStateSubject.value;
@@ -88,7 +96,8 @@ export class GameService {
   }
 
   /**
-   * Start the game
+   * Starts the game with current settings
+   * This method initializes all game loops and resets the game state
    */
   startGame(): void {
     const currentState = this.gameStateSubject.value;
@@ -121,7 +130,8 @@ export class GameService {
   }
 
   /**
-   * Stop the game
+   * Stops the game and saves the score if applicable
+   * This method is called when the game ends or is manually stopped
    */
   stopGame(): void {
     this.gameLoopDestroy$.next();
@@ -151,7 +161,9 @@ export class GameService {
   }
 
   /**
-   * Move player left or right
+   * Moves the player left or right based on input
+   * This method is called when the player presses movement keys
+   * @param direction - The direction to move the player
    */
   movePlayer(direction: "left" | "right"): void {
     const currentState = this.gameStateSubject.value;
@@ -176,7 +188,8 @@ export class GameService {
   }
 
   /**
-   * Check if form is valid (all fields filled)
+   * Checks if the current game settings are valid
+   * @returns True if all settings are within valid ranges
    */
   public isFormValid(): boolean {
     const settings = this.gameStateSubject.value.settings;
@@ -189,7 +202,8 @@ export class GameService {
   }
 
   /**
-   * Start the main game loop
+   * Starts the main game loop that updates game state
+   * This method runs at approximately 60 FPS
    */
   private startGameLoop(): void {
     interval(16) // ~60 FPS
@@ -200,7 +214,8 @@ export class GameService {
   }
 
   /**
-   * Start object spawning timer
+   * Starts the object spawning loop
+   * This method creates new falling objects at regular intervals
    */
   private startObjectSpawning(): void {
     const settings = this.gameStateSubject.value.settings;
@@ -213,7 +228,8 @@ export class GameService {
   }
 
   /**
-   * Start game timer
+   * Starts the game timer
+   * This method decrements the time remaining every second
    */
   private startTimer(): void {
     interval(1000)
@@ -241,7 +257,8 @@ export class GameService {
   }
 
   /**
-   * Update game state (move objects, check collisions)
+   * Updates the game state
+   * This method is called every frame to update object positions and check collisions
    */
   private updateGame(): void {
     const currentState = this.gameStateSubject.value;
@@ -280,7 +297,8 @@ export class GameService {
   }
 
   /**
-   * Spawn a new falling object
+   * Spawns a new falling object
+   * This method creates a new object at a random x position
    */
   private spawnFallingObject(): void {
     const currentState = this.gameStateSubject.value;
@@ -303,7 +321,10 @@ export class GameService {
   }
 
   /**
-   * Check collisions between player and falling objects
+   * Checks for collisions between the player and falling objects
+   * @param objects - Array of falling objects to check
+   * @param player - The player object
+   * @returns Object containing caught and remaining objects
    */
   private checkCollisions(
     objects: FallingObject[],
@@ -324,7 +345,10 @@ export class GameService {
   }
 
   /**
-   * Check if two objects are colliding
+   * Checks if two objects are colliding using AABB collision detection
+   * @param obj1 - First object to check
+   * @param obj2 - Second object to check
+   * @returns True if objects are colliding
    */
   private isColliding(
     obj1: { x: number; y: number; width: number; height: number },
@@ -339,14 +363,16 @@ export class GameService {
   }
 
   /**
-   * Get game bounds
+   * Gets the current game bounds
+   * @returns The game boundaries object
    */
   getGameBounds(): GameBounds {
     return this.gameBounds;
   }
 
   /**
-   * Initialize offline detection and auto-pause functionality
+   * Initializes offline detection and auto-pause functionality
+   * This method sets up listeners for online/offline state changes
    */
   private initOfflineDetection(): void {
     this.offlineService.isOnline$.subscribe((isOnline: boolean) => {
@@ -372,7 +398,8 @@ export class GameService {
   }
 
   /**
-   * Initialize tab visibility detection for auto-pause functionality
+   * Initializes tab visibility detection for auto-pause functionality
+   * This method sets up listeners for tab visibility and window focus changes
    */
   private initTabVisibilityDetection(): void {
     // Helper to get current state
@@ -428,7 +455,9 @@ export class GameService {
   }
 
   /**
-   * Pause the game
+   * Pauses the game
+   * This method is called when the game needs to be paused
+   * @param reason - The reason for pausing the game
    */
   pauseGame(reason: "manual" | "offline" | "tab-hidden" = "manual"): void {
     const currentState = this.gameStateSubject.value;
@@ -449,7 +478,9 @@ export class GameService {
   }
 
   /**
-   * Resume the game
+   * Resumes the game
+   * This method is called when the game needs to be resumed
+   * @param forceResume - Whether to force resume regardless of pause reason
    */
   resumeGame(forceResume: boolean = false): void {
     const currentState = this.gameStateSubject.value;

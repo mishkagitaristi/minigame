@@ -12,11 +12,16 @@ import { GameService } from "../../services/game";
   standalone: true,
 })
 export class GameComponent implements OnInit {
+  // Inject required services
   private readonly gameService = inject(GameService);
   private readonly destroyRef = inject(DestroyRef);
 
+  // Current game state
   gameState: GameState | null = null;
 
+  /**
+   * Sets up game state subscription and keyboard event handling
+   */
   ngOnInit(): void {
     this.gameService.gameState$
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -53,18 +58,31 @@ export class GameComponent implements OnInit {
       });
   }
 
+  /**
+   * Handles the stop game action
+   */
   onStopGame(): void {
     this.gameService.stopGame();
   }
 
+  /**
+   * Handles the pause game action
+   */
   onPauseGame(): void {
     this.gameService.pauseGame();
   }
 
+  /**
+   * Handles the resume game action
+   * Forces resume regardless of pause reason
+   */
   onResumeGame(): void {
     this.gameService.resumeGame(true);
   }
 
+  /**
+   * Toggles the game pause state
+   */
   togglePause(): void {
     if (this.gameState?.isPaused) {
       this.onResumeGame();
@@ -73,24 +91,45 @@ export class GameComponent implements OnInit {
     }
   }
 
+  /**
+   * Restarts the game
+   */
   restartGame(): void {
     this.gameService.startGame();
   }
 
+  /**
+   * Formats time in seconds to MM:SS format
+   * @param seconds - Time in seconds
+   * @returns Formatted time string
+   */
   formatTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   }
 
+  /**
+   * TrackBy function for ngFor to optimize rendering of falling objects
+   * @param index - The index of the object
+   * @param obj - The falling object
+   * @returns Unique identifier for the object
+   */
   trackByObjectId(index: number, obj: FallingObject): string {
     return obj.id;
   }
 
+  /**
+   * Starts the game
+   */
   startGame(): void {
     this.gameService.startGame();
   }
 
+  /**
+   * Checks if the game settings form is valid
+   * @returns True if the form is valid
+   */
   isFormValid(): boolean {
     return this.gameService.isFormValid();
   }

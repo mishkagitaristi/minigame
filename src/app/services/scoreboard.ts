@@ -10,16 +10,24 @@ import {
   providedIn: "root",
 })
 export class ScoreboardService {
+  // Key used for storing scoreboard data in localStorage
   private readonly STORAGE_KEY = "slots-game-scoreboard";
-  private readonly MAX_SCORES = 10; // Keep top 10 scores
+  // Maximum number of scores to keep in the scoreboard
+  private readonly MAX_SCORES = 10;
 
+  // BehaviorSubject to handle scoreboard state with initial value from localStorage
   private scoreboardSubject = new BehaviorSubject<Scoreboard>(
     this.loadScoreboard()
   );
+  // Public observable for components to subscribe to scoreboard updates
   public scoreboard$ = this.scoreboardSubject.asObservable();
 
   /**
-   * Add a new score entry to the scoreboard
+   * Adds a new score entry to the scoreboard
+   * This method is called when a game ends to record the player's score
+   * @param score - The final score achieved
+   * @param gameSettings - The settings used during the game
+   * @param gameTime - The time taken to complete the game
    */
   addScore(score: number, gameSettings: GameSettings, gameTime: number): void {
     const newEntry: ScoreEntry = {
@@ -47,7 +55,8 @@ export class ScoreboardService {
   }
 
   /**
-   * Reset the scoreboard (clear all scores)
+   * Resets the scoreboard by clearing all scores
+   * This method is called when the user wants to start fresh
    */
   resetScoreboard(): void {
     const emptyScoreboard: Scoreboard = {
@@ -61,21 +70,26 @@ export class ScoreboardService {
   }
 
   /**
-   * Get the current scoreboard
+   * Gets the current scoreboard state
+   * @returns The current scoreboard object
    */
   getScoreboard(): Scoreboard {
     return this.scoreboardSubject.value;
   }
 
   /**
-   * Get top N scores
+   * Gets the top N scores from the scoreboard
+   * @param count - Number of top scores to retrieve (default: 5)
+   * @returns Array of top score entries
    */
   getTopScores(count: number = 5): ScoreEntry[] {
     return this.scoreboardSubject.value.scores.slice(0, count);
   }
 
   /**
-   * Check if a score qualifies for the top scores
+   * Checks if a score qualifies for the top scores list
+   * @param score - The score to check
+   * @returns True if the score qualifies for the top scores
    */
   isHighScore(score: number): boolean {
     const scores = this.scoreboardSubject.value.scores;
@@ -86,7 +100,8 @@ export class ScoreboardService {
   }
 
   /**
-   * Get player's best score
+   * Gets the best score achieved so far
+   * @returns The highest score in the scoreboard
    */
   getBestScore(): number {
     const scores = this.scoreboardSubject.value.scores;
@@ -94,14 +109,17 @@ export class ScoreboardService {
   }
 
   /**
-   * Get total games played
+   * Gets the total number of games played
+   * @returns The number of scores in the scoreboard
    */
   getTotalGamesPlayed(): number {
     return this.scoreboardSubject.value.scores.length;
   }
 
   /**
-   * Load scoreboard from localStorage
+   * Loads the scoreboard from localStorage
+   * This method is called during service initialization
+   * @returns The loaded scoreboard or an empty one if none exists
    */
   private loadScoreboard(): Scoreboard {
     try {
@@ -121,7 +139,6 @@ export class ScoreboardService {
       console.error("Error loading scoreboard:", error);
     }
 
-    // Return empty scoreboard if none exists or error occurred
     return {
       scores: [],
       lastUpdated: new Date(),
@@ -129,7 +146,9 @@ export class ScoreboardService {
   }
 
   /**
-   * Save scoreboard to localStorage
+   * Saves the current scoreboard to localStorage
+   * This method is called whenever the scoreboard is updated
+   * @param scoreboard - The scoreboard to save
    */
   private saveScoreboard(scoreboard: Scoreboard): void {
     try {
