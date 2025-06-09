@@ -1,0 +1,137 @@
+<div class="game-settings">
+  <div class="game-settings__container">
+    <h2 class="game-settings__title">Game Settings</h2>
+
+    <form [formGroup]="settingsForm" class="game-settings__form">
+      <!-- Falling Speed -->
+      <div class="game-settings__field">
+        <label for="fallingSpeed" class="game-settings__label">
+          Falling Speed (1-10):
+        </label>
+        <input
+          id="fallingSpeed"
+          type="number"
+          formControlName="fallingSpeed"
+          class="game-settings__input"
+          [class.game-settings__input--error]="fallingSpeed?.invalid && fallingSpeed?.touched"
+          min="0.1"
+          max="10"
+          step="0.1"
+        />
+        @if(fallingSpeed?.invalid && fallingSpeed?.touched) {
+        <div class="game-settings__error">
+          @if(fallingSpeed?.errors?.['required']) {
+          <span>Falling speed is required</span>
+          } @if(fallingSpeed?.errors?.['min']) {
+          <span>Minimum value is 0.1</span>
+          } @if(fallingSpeed?.errors?.['max']) {
+          <span>Maximum value is 10</span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Falling Frequency -->
+      <div class="game-settings__field">
+        <label for="fallingFrequency" class="game-settings__label">
+          Falling Frequency (100-5000ms):
+        </label>
+        <input
+          id="fallingFrequency"
+          type="number"
+          formControlName="fallingFrequency"
+          class="game-settings__input"
+          [class.game-settings__input--error]="fallingFrequency?.invalid && fallingFrequency?.touched"
+          min="100"
+          max="5000"
+          step="100"
+        />
+        @if(fallingFrequency?.invalid && fallingFrequency?.touched) {
+        <div class="game-settings__error">
+          @if(fallingFrequency?.errors?.['required']) {
+          <span>Falling frequency is required</span>
+          } @if(fallingFrequency?.errors?.['min']) {
+          <span>Minimum value is 100ms</span>
+          } @if(fallingFrequency?.errors?.['max']) {
+          <span>Maximum value is 5000ms</span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Player Speed -->
+      <div class="game-settings__field">
+        <label for="playerSpeed" class="game-settings__label">
+          Player Speed (1-20):
+        </label>
+        <input
+          id="playerSpeed"
+          type="number"
+          formControlName="playerSpeed"
+          class="game-settings__input"
+          [class.game-settings__input--error]="playerSpeed?.invalid && playerSpeed?.touched"
+          min="1"
+          max="20"
+        />
+        @if(playerSpeed?.invalid && playerSpeed?.touched) {
+        <div class="game-settings__error">
+          @if(playerSpeed?.errors?.['required']) {
+          <span>Player speed is required</span>
+          } @if(playerSpeed?.errors?.['min']) {
+          <span>Minimum value is 1</span>
+          } @if(playerSpeed?.errors?.['max']) {
+          <span>Maximum value is 20</span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Game Time -->
+      <div class="game-settings__field">
+        <label for="gameTime" class="game-settings__label">
+          Game Time (10-300 seconds):
+        </label>
+        <input
+          id="gameTime"
+          type="number"
+          formControlName="gameTime"
+          class="game-settings__input"
+          [class.game-settings__input--error]="gameTime?.invalid && gameTime?.touched"
+          min="10"
+          max="300"
+        />
+        @if(gameTime?.invalid && gameTime?.touched) {
+        <div class="game-settings__error">
+          @if(gameTime?.errors?.['required']) {
+          <span>Game time is required</span>
+          } @if(gameTime?.errors?.['min']) {
+          <span>Minimum time is 10 seconds</span>
+          } @if(gameTime?.errors?.['max']) {
+          <span>Maximum time is 300 seconds</span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Start Button -->
+      <button
+        type="button"
+        class="game-settings__button"
+        [class.game-settings__button--disabled]="!isFormValid()"
+        [disabled]="!isFormValid()"
+        (click)="onStartGame()"
+      >
+        Start Game
+      </button>
+
+      <!-- Reset Button -->
+      <button
+        type="button"
+        class="game-settings__button game-settings__button--secondary"
+        (click)="resetToDefaults()"
+      >
+        Reset to Defaults
+      </button>
+    </form>
+  </div>
+</div>

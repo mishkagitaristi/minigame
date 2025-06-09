@@ -1,0 +1,89 @@
+<div class="scoreboard">
+  <div class="scoreboard__container">
+    <div class="scoreboard__header">
+      <h2 class="scoreboard__title">🏆 High Scores</h2>
+      @if(hasScores()) {
+      <button
+        class="scoreboard__reset-button"
+        (click)="onResetScoreboard()"
+        title="Reset scoreboard"
+      >
+        🗑️ Reset
+      </button>
+      }
+    </div>
+
+    <!-- Statistics Summary -->
+    @if(hasScores()) {
+    <div class="scoreboard__stats">
+      <div class="scoreboard__stat">
+        <span class="scoreboard__stat-label">Best Score</span>
+        <span class="scoreboard__stat-value">{{ getBestScore() }}</span>
+      </div>
+      <div class="scoreboard__stat">
+        <span class="scoreboard__stat-label">Games Played</span>
+        <span class="scoreboard__stat-value">{{ getTotalGamesPlayed() }}</span>
+      </div>
+    </div>
+    }
+    <!-- Scores List -->
+    @if(hasScores()) {
+    <div class="scoreboard__scores">
+      @for(score of scoreboard!.scores; track score.id; let i = $index) {
+      <div
+        class="scoreboard__score-entry"
+        [class.scoreboard__score-entry--top]="i < 3"
+      >
+        <div class="scoreboard__rank">{{ getScoreRank(i) }}</div>
+
+        <div class="scoreboard__score-info">
+          <div class="scoreboard__score-main">
+            <span class="scoreboard__score-points"
+              >{{ score.score }} points</span
+            >
+            <span class="scoreboard__score-date"
+              >{{ formatDate(score.timestamp) }}</span
+            >
+          </div>
+
+          <div class="scoreboard__score-details">
+            <span class="scoreboard__score-detail">
+              ⚡ Speed: {{ score.gameSettings.fallingSpeed }}
+            </span>
+            <span class="scoreboard__score-detail">
+              ⏱️ Freq: {{ score.gameSettings.fallingFrequency }}ms
+            </span>
+            <span class="scoreboard__score-detail">
+              🏃 Player: {{ score.gameSettings.playerSpeed }}
+            </span>
+            <span class="scoreboard__score-detail">
+              ⏰ Duration: {{ formatGameTime(score.gameTime) }}
+            </span>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- Empty State -->
+    <ng-template #emptyState>
+      <div class="scoreboard__empty">
+        <div class="scoreboard__empty-icon">🎮</div>
+        <h3 class="scoreboard__empty-title">No Scores Yet</h3>
+        <p class="scoreboard__empty-message">
+          Play your first game to see your scores here!
+        </p>
+      </div>
+    </ng-template>
+
+    <!-- Last Updated -->
+    @if(scoreboard) {
+    <div class="scoreboard__footer">
+      <span class="scoreboard__last-updated">
+        Last updated: {{ formatDate(scoreboard.lastUpdated) }}
+      </span>
+    </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,118 @@
+<div class="game" *ngIf="gameState">
+  <!-- Game UI -->
+  <div class="game__ui">
+    <div class="game__stats">
+      <div class="game__stat">
+        <span class="game__stat-label">Score:</span>
+        <span class="game__stat-value">{{ gameState.score }}</span>
+      </div>
+      <div class="game__stat" *ngIf="gameState.isGameRunning">
+        <span class="game__stat-label">Time:</span>
+        <span class="game__stat-value"
+          >{{ formatTime(gameState.timeRemaining) }}</span
+        >
+      </div>
+    </div>
+    <div class="game__controls-buttons" *ngIf="gameState.isGameRunning">
+      <button
+        class="game__pause-button"
+        (click)="togglePause()"
+        [disabled]="gameState.isOffline"
+      >
+        {{ gameState.isPaused ? 'Resume' : 'Pause' }}
+      </button>
+      <button class="game__stop-button" (click)="onStopGame()">
+        Stop Game
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Area -->
+  <div class="game__area" *ngIf="gameState.isGameStarted">
+    <!-- Player -->
+    <div
+      class="game__player"
+      [style.left.px]="gameState.player.x"
+      [style.top.px]="gameState.player.y"
+      [style.width.px]="gameState.player.width"
+      [style.height.px]="gameState.player.height"
+    ></div>
+  </div>
+  <!-- Falling Objects -->
+  <div
+    *ngFor="let obj of gameState.fallingObjects; trackBy: trackByObjectId"
+    class="game__falling-object"
+    [style.left.px]="obj.x"
+    [style.top.px]="obj.y"
+    [style.width.px]="obj.width"
+    [style.height.px]="obj.height"
+  ></div>
+
+  <!-- Offline Notification Overlay -->
+  <div class="game__offline-overlay" *ngIf="gameState.isOffline">
+    <div class="game__offline-content">
+      <div class="game__offline-icon">⚠️</div>
+      <h3 class="game__offline-title">Connection Lost</h3>
+      <p class="game__offline-message">
+        You are currently offline. The game has been paused automatically.
+      </p>
+      <p class="game__offline-submessage">
+        Game will resume when your connection is restored.
+      </p>
+      <div class="game__offline-animation">
+        <div class="game__pulse"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Manual Pause Overlay -->
+  <div
+    class="game__pause-overlay"
+    *ngIf="gameState.isPaused && !gameState.isOffline"
+  >
+    <div class="game__pause-content">
+      <div class="game__pause-icon">
+        {{ gameState.pauseReason === 'tab-hidden' ? '👀' : '⏸️' }}
+      </div>
+      <h3 class="game__pause-title">
+        {{ gameState.pauseReason === 'tab-hidden' ? 'Tab Hidden' : 'GamePaused'
+        }}
+      </h3>
+      <p
+        class="game__pause-message"
+        *ngIf="gameState.pauseReason === 'tab-hidden'"
+      >
+        Game paused automatically when you switched tabs or minimized the
+        window.
+      </p>
+      <p class="game__pause-message" *ngIf="gameState.pauseReason === 'manual'">
+        Press <kbd>Space</kbd> or <kbd>Escape</kbd> to resume, or click the
+        Resume button.
+      </p>
+      <button class="game__resume-button" (click)="onResumeGame()">
+        Resume Game
+      </button>
+    </div>
+  </div>
+  <!-- Game Controls Info -->
+  <div class="game__controls" *ngIf="gameState.isGameRunning">
+    <p class="game__controls-text">
+      Use <kbd>←</kbd> <kbd>→</kbd> arrow keys or <kbd>A</kbd> <kbd>D</kbd> keys
+      to move • <kbd>Space</kbd> or <kbd>Esc</kbd> to pause • Game auto-pauses
+      when switching tabs
+    </p>
+  </div>
+  <!-- Game Over Screen -->
+  <div
+    class="game__game-over"
+    *ngIf="!gameState.isGameRunning && gameState.isGameStarted"
+  >
+    <div class="game__game-over-icon">🎮</div>
+    <h3 class="game__game-over-title">Game Over!</h3>
+    <p class="game__game-over-score">Final Score: {{ gameState.score }}</p>
+    <div class="game__game-over-actions">
+      <button class="game__play-again-button" (click)="restartGame()">
+        🔄 Play Again
+      </button>
+    </div>
+  </div>
+</div>
