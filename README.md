@@ -162,14 +162,3 @@ The build artifacts will be stored in the `dist/` directory, optimized for produ
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🎯 Future Enhancements
-
-- [ ] Multiplayer support
-- [ ] Power-ups and special objects
-- [ ] Different difficulty levels
-- [ ] Sound effects and music
-- [ ] Mobile touch controls
-- [ ] Social sharing features
-- [ ] Achievements system
-- [ ] Leaderboard sync across devices

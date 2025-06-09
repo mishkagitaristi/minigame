@@ -1,15 +1,13 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ScoreboardService } from '../../services/scoreboard';
-import { ScoreEntry, Scoreboard } from '../../types/game.types';
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
+import { ScoreboardService } from "../../services/scoreboard";
+import { ScoreEntry, Scoreboard } from "../../types/game.types";
 
 @Component({
-  selector: 'app-scoreboard',
-  templateUrl: './scoreboard.html',
-  styleUrls: ['./scoreboard.scss'],
-  imports: [CommonModule],
+  selector: "app-scoreboard",
+  templateUrl: "./scoreboard.html",
+  styleUrls: ["./scoreboard.scss"],
   standalone: true,
 })
 export class ScoreboardComponent implements OnInit, OnDestroy {
@@ -34,7 +32,7 @@ export class ScoreboardComponent implements OnInit, OnDestroy {
   onResetScoreboard(): void {
     if (
       confirm(
-        'Are you sure you want to reset the scoreboard? This action cannot be undone.'
+        "Are you sure you want to reset the scoreboard? This action cannot be undone."
       )
     ) {
       this.scoreboardService.resetScoreboard();
@@ -42,26 +40,26 @@ export class ScoreboardComponent implements OnInit, OnDestroy {
   }
 
   formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   }
 
   formatGameTime(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   }
 
   getScoreRank(index: number): string {
     const rank = index + 1;
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
+    if (rank === 1) return "🥇";
+    if (rank === 2) return "🥈";
+    if (rank === 3) return "🥉";
     return `#${rank}`;
   }
 

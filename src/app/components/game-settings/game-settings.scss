@@ -1,103 +1,110 @@
 .game-settings {
-  max-width: 400px;
+  max-width: 800px;
   margin: 0 auto;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
 
   &__container {
     background: #ffffff;
-    border-radius: 12px;
+    border-radius: 16px;
+    padding: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
     border: 2px solid #e0e7ff;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
   &__title {
-    margin: 0 0 1.5rem 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1e293b;
     text-align: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
     background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   &__form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 16px;
+    flex: 1;
+  }
+
+  &__fields-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 
   &__field {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 4px;
   }
 
   &__label {
+    font-size: 14px;
     font-weight: 600;
-    color: #374151;
-    font-size: 0.875rem;
-    margin-bottom: 0.25rem;
+    color: #4b5563;
   }
 
   &__input {
-    padding: 0.75rem;
-    border: 2px solid #d1d5db;
+    padding: 8px;
+    border: 2px solid #e5e7eb;
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 14px;
     transition: all 0.2s ease;
-    background: #ffffff;
+    background: #f9fafb;
 
     &:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    &:hover {
-      border-color: #9ca3af;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     &--error {
       border-color: #ef4444;
-      background-color: #fef2f2;
 
       &:focus {
-        border-color: #ef4444;
         box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
       }
     }
   }
 
   &__error {
-    font-size: 0.875rem;
     color: #ef4444;
-    margin-top: 0.25rem;
+    font-size: 12px;
+    margin-top: 2px;
+  }
 
-    span {
-      display: block;
-    }
+  &__buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: auto;
   }
 
   &__button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    flex: 1;
+    padding: 10px 16px;
     border: none;
     border-radius: 8px;
-    padding: 0.875rem 1.5rem;
-    font-size: 1rem;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: 1rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
 
-    &:hover:not(&--disabled) {
+    &:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     }
 
-    &:active:not(&--disabled) {
+    &:active:not(:disabled) {
       transform: translateY(0);
     }
 
@@ -108,31 +115,35 @@
     }
 
     &--secondary {
-      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-      color: white;
-      margin-top: 0.5rem;
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
 
       &:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(100, 116, 139, 0.4);
-      }
-
-      &:active {
-        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
       }
     }
   }
 
   // Responsive design
-  @media (max-width: 480px) {
-    padding: 1rem;
+  @media (max-width: 768px) {
+    height: auto;
+    min-height: 350px;
 
     &__container {
-      padding: 1.5rem;
+      padding: 16px;
     }
 
     &__title {
-      font-size: 1.25rem;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    &__fields-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    &__buttons {
+      flex-direction: column;
     }
   }
 }

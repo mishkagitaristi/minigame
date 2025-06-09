@@ -1,4 +1,5 @@
-<div class="game" *ngIf="gameState">
+<div class="game">
+  @if(gameState) {
   <!-- Game UI -->
   <div class="game__ui">
     <div class="game__stats">
@@ -6,14 +7,17 @@
         <span class="game__stat-label">Score:</span>
         <span class="game__stat-value">{{ gameState.score }}</span>
       </div>
-      <div class="game__stat" *ngIf="gameState.isGameRunning">
+      @if(gameState.isGameRunning) {
+      <div class="game__stat">
         <span class="game__stat-label">Time:</span>
         <span class="game__stat-value"
           >{{ formatTime(gameState.timeRemaining) }}</span
         >
       </div>
+      }
     </div>
-    <div class="game__controls-buttons" *ngIf="gameState.isGameRunning">
+    @if(gameState.isGameRunning) {
+    <div class="game__controls-buttons">
       <button
         class="game__pause-button"
         (click)="togglePause()"
@@ -25,10 +29,38 @@
         Stop Game
       </button>
     </div>
+    }
   </div>
 
-  <!-- Game Area -->
-  <div class="game__area" *ngIf="gameState.isGameStarted">
+  <!-- Game Area or Placeholder -->
+  <div
+    class="game__area"
+    [class.game__area--placeholder]="!gameState.isGameStarted"
+  >
+    @if(!gameState.isGameStarted) {
+    <!-- Placeholder Content -->
+    <div class="game__placeholder">
+      <div class="game__placeholder-icon">🎮</div>
+      <h3 class="game__placeholder-title">Ready to Play?</h3>
+      <p class="game__placeholder-message">
+        Configure your game settings and click "Start Game" to begin!
+      </p>
+      <button class="game__start-button" (click)="startGame()">
+        Start Game
+      </button>
+      <div class="game__placeholder-controls">
+        <div class="game__placeholder-control">
+          <span class="game__placeholder-key">←</span>
+          <span class="game__placeholder-key">→</span>
+          <span class="game__placeholder-label">Move</span>
+        </div>
+        <div class="game__placeholder-control">
+          <span class="game__placeholder-key">Space</span>
+          <span class="game__placeholder-label">Pause</span>
+        </div>
+      </div>
+    </div>
+    } @if(gameState.isGameStarted) {
     <!-- Player -->
     <div
       class="game__player"
@@ -37,19 +69,24 @@
       [style.width.px]="gameState.player.width"
       [style.height.px]="gameState.player.height"
     ></div>
+    <div class="game__falling-objects-container">
+      @for(obj of gameState.fallingObjects; track obj.id) {
+      <div
+        class="game__falling-object"
+        [style.left.px]="obj.x"
+        [style.top.px]="obj.y"
+        [style.width.px]="obj.width"
+        [style.height.px]="obj.height"
+      ></div>
+      }
+    </div>
+    }
+    <!-- Falling Objects Container -->
   </div>
-  <!-- Falling Objects -->
-  <div
-    *ngFor="let obj of gameState.fallingObjects; trackBy: trackByObjectId"
-    class="game__falling-object"
-    [style.left.px]="obj.x"
-    [style.top.px]="obj.y"
-    [style.width.px]="obj.width"
-    [style.height.px]="obj.height"
-  ></div>
 
+  @if(gameState.isOffline) {
   <!-- Offline Notification Overlay -->
-  <div class="game__offline-overlay" *ngIf="gameState.isOffline">
+  <div class="game__offline-overlay">
     <div class="game__offline-content">
       <div class="game__offline-icon">⚠️</div>
       <h3 class="game__offline-title">Connection Lost</h3>
@@ -64,11 +101,9 @@
       </div>
     </div>
   </div>
+  } @if(gameState.isPaused && !gameState.isOffline) {
   <!-- Manual Pause Overlay -->
-  <div
-    class="game__pause-overlay"
-    *ngIf="gameState.isPaused && !gameState.isOffline"
-  >
+  <div class="game__pause-overlay">
     <div class="game__pause-content">
       <div class="game__pause-icon">
         {{ gameState.pauseReason === 'tab-hidden' ? '👀' : '⏸️' }}
@@ -77,35 +112,36 @@
         {{ gameState.pauseReason === 'tab-hidden' ? 'Tab Hidden' : 'GamePaused'
         }}
       </h3>
-      <p
-        class="game__pause-message"
-        *ngIf="gameState.pauseReason === 'tab-hidden'"
-      >
+      @if(gameState.pauseReason === 'tab-hidden') {
+      <p class="game__pause-message">
         Game paused automatically when you switched tabs or minimized the
         window.
       </p>
-      <p class="game__pause-message" *ngIf="gameState.pauseReason === 'manual'">
+      } @if(gameState.pauseReason === 'manual') {
+      <p class="game__pause-message">
         Press <kbd>Space</kbd> or <kbd>Escape</kbd> to resume, or click the
         Resume button.
       </p>
+      }
       <button class="game__resume-button" (click)="onResumeGame()">
         Resume Game
       </button>
     </div>
   </div>
+  }
+
   <!-- Game Controls Info -->
-  <div class="game__controls" *ngIf="gameState.isGameRunning">
+  <div class="game__controls">
     <p class="game__controls-text">
       Use <kbd>←</kbd> <kbd>→</kbd> arrow keys or <kbd>A</kbd> <kbd>D</kbd> keys
       to move • <kbd>Space</kbd> or <kbd>Esc</kbd> to pause • Game auto-pauses
       when switching tabs
     </p>
   </div>
+
+  @if(!gameState.isGameRunning && gameState.isGameStarted) {
   <!-- Game Over Screen -->
-  <div
-    class="game__game-over"
-    *ngIf="!gameState.isGameRunning && gameState.isGameStarted"
-  >
+  <div class="game__game-over">
     <div class="game__game-over-icon">🎮</div>
     <h3 class="game__game-over-title">Game Over!</h3>
     <p class="game__game-over-score">Final Score: {{ gameState.score }}</p>
@@ -115,4 +151,5 @@
       </button>
     </div>
   </div>
+  } }
 </div>

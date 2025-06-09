@@ -1,0 +1,15 @@
+.game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  height: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+
+  // Responsive design
+  @media (max-width: 768px) {
+    height: auto;
+    min-height: 900px;
+  }
+} 
