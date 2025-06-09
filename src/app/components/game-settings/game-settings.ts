@@ -1,25 +1,27 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
   Validators,
-} from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
-import { GameService } from '../../services/game';
-import { GameSettings } from '../../types/game.types';
+} from "@angular/forms";
+import { GameSettings } from "../../interfaces/game.interface";
+import { GameService } from "../../services/game";
 
 @Component({
-  selector: 'app-game-settings',
-  templateUrl: './game-settings.html',
-  styleUrls: ['./game-settings.scss'],
-  imports: [ReactiveFormsModule, CommonModule],
+  selector: "app-game-settings",
+  templateUrl: "./game-settings.html",
+  styleUrls: ["./game-settings.scss"],
+  imports: [ReactiveFormsModule],
   standalone: true,
 })
-export class GameSettingsComponent implements OnInit, OnDestroy {
+export class GameSettingsComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly fb = inject(FormBuilder);
+  private readonly gameService = inject(GameService);
   settingsForm!: FormGroup;
-  private destroy$ = new Subject<void>();
 
   // Default settings constant for reset functionality
   private readonly defaultSettings: GameSettings = {
@@ -29,16 +31,9 @@ export class GameSettingsComponent implements OnInit, OnDestroy {
     gameTime: 60,
   };
 
-  constructor(private fb: FormBuilder, private gameService: GameService) {}
-
   ngOnInit(): void {
     this.initForm();
     this.subscribeToFormChanges();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private initForm(): void {
@@ -64,7 +59,7 @@ export class GameSettingsComponent implements OnInit, OnDestroy {
 
   private subscribeToFormChanges(): void {
     this.settingsForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((settings: GameSettings) => {
         if (this.settingsForm.valid) {
           this.gameService.updateSettings(settings);
@@ -73,16 +68,16 @@ export class GameSettingsComponent implements OnInit, OnDestroy {
   }
 
   get fallingSpeed() {
-    return this.settingsForm.get('fallingSpeed');
+    return this.settingsForm.get("fallingSpeed");
   }
   get fallingFrequency() {
-    return this.settingsForm.get('fallingFrequency');
+    return this.settingsForm.get("fallingFrequency");
   }
   get playerSpeed() {
-    return this.settingsForm.get('playerSpeed');
+    return this.settingsForm.get("playerSpeed");
   }
   get gameTime() {
-    return this.settingsForm.get('gameTime');
+    return this.settingsForm.get("gameTime");
   }
 
   isFormValid(): boolean {

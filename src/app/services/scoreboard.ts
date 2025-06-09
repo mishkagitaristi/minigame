@@ -1,12 +1,16 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { GameSettings, ScoreEntry, Scoreboard } from '../types/game.types';
+import { Injectable } from "@angular/core";
+import { BehaviorSubject } from "rxjs";
+import {
+  GameSettings,
+  ScoreEntry,
+  Scoreboard,
+} from "../interfaces/game.interface";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class ScoreboardService {
-  private readonly STORAGE_KEY = 'slots-game-scoreboard';
+  private readonly STORAGE_KEY = "slots-game-scoreboard";
   private readonly MAX_SCORES = 10; // Keep top 10 scores
 
   private scoreboardSubject = new BehaviorSubject<Scoreboard>(
@@ -14,14 +18,12 @@ export class ScoreboardService {
   );
   public scoreboard$ = this.scoreboardSubject.asObservable();
 
-  constructor() {}
-
   /**
    * Add a new score entry to the scoreboard
    */
   addScore(score: number, gameSettings: GameSettings, gameTime: number): void {
     const newEntry: ScoreEntry = {
-      id: `score-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `score-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       score,
       timestamp: new Date(),
       gameSettings: { ...gameSettings },
@@ -41,7 +43,7 @@ export class ScoreboardService {
     this.scoreboardSubject.next(updatedScoreboard);
     this.saveScoreboard(updatedScoreboard);
 
-    console.log('New score added:', newEntry);
+    console.log("New score added:", newEntry);
   }
 
   /**
@@ -55,7 +57,7 @@ export class ScoreboardService {
 
     this.scoreboardSubject.next(emptyScoreboard);
     this.saveScoreboard(emptyScoreboard);
-    console.log('Scoreboard reset');
+    console.log("Scoreboard reset");
   }
 
   /**
@@ -116,7 +118,7 @@ export class ScoreboardService {
         };
       }
     } catch (error) {
-      console.error('Error loading scoreboard:', error);
+      console.error("Error loading scoreboard:", error);
     }
 
     // Return empty scoreboard if none exists or error occurred
@@ -133,7 +135,7 @@ export class ScoreboardService {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(scoreboard));
     } catch (error) {
-      console.error('Error saving scoreboard:', error);
+      console.error("Error saving scoreboard:", error);
     }
   }
 }

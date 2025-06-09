@@ -45,7 +45,12 @@
       <p class="game__placeholder-message">
         Configure your game settings and click "Start Game" to begin!
       </p>
-      <button class="game__start-button" (click)="startGame()">
+      <button
+        class="game__start-button"
+        (click)="startGame()"
+        [class.game__start-button--disabled]="!isFormValid()"
+        [disabled]="!isFormValid()"
+      >
         Start Game
       </button>
       <div class="game__placeholder-controls">
@@ -109,23 +114,27 @@
         {{ gameState.pauseReason === 'tab-hidden' ? '👀' : '⏸️' }}
       </div>
       <h3 class="game__pause-title">
-        {{ gameState.pauseReason === 'tab-hidden' ? 'Tab Hidden' : 'GamePaused'
-        }}
+        {{ gameState.pauseReason === 'tab-hidden' ? 'Tab Hidden' : 'Game Paused' }}
       </h3>
       @if(gameState.pauseReason === 'tab-hidden') {
       <p class="game__pause-message">
-        Game paused automatically when you switched tabs or minimized the
-        window.
+        Game paused automatically when you switched tabs or minimized the window.
+        <br>
+        <span class="game__pause-submessage">Return to this tab to continue playing.</span>
       </p>
       } @if(gameState.pauseReason === 'manual') {
       <p class="game__pause-message">
-        Press <kbd>Space</kbd> or <kbd>Escape</kbd> to resume, or click the
-        Resume button.
+        Press <kbd>Space</kbd> or <kbd>Escape</kbd> to resume, or click the Resume button below.
       </p>
       }
-      <button class="game__resume-button" (click)="onResumeGame()">
-        Resume Game
-      </button>
+      <div class="game__pause-actions">
+        <button class="game__resume-button" (click)="onResumeGame()">
+          {{ gameState.pauseReason === 'tab-hidden' ? 'Resume Game' : 'Continue Playing' }}
+        </button>
+        <button class="game__stop-button" (click)="onStopGame()">
+          Stop Game
+        </button>
+      </div>
     </div>
   </div>
   }
@@ -142,9 +151,15 @@
   @if(!gameState.isGameRunning && gameState.isGameStarted) {
   <!-- Game Over Screen -->
   <div class="game__game-over">
-    <div class="game__game-over-icon">🎮</div>
+    <div class="game__game-over-icon">🎉</div>
     <h3 class="game__game-over-title">Game Over!</h3>
-    <p class="game__game-over-score">Final Score: {{ gameState.score }}</p>
+    <div class="game__game-over-subtitle">
+      Well played! Try to beat your score next time.
+    </div>
+    <div class="game__game-over-score-badge">
+      <span class="game__game-over-score-label">Final Score</span>
+      <span class="game__game-over-score-value">{{ gameState.score }}</span>
+    </div>
     <div class="game__game-over-actions">
       <button class="game__play-again-button" (click)="restartGame()">
         🔄 Play Again

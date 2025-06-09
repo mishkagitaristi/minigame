@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, fromEvent, merge } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable } from "@angular/core";
+import { BehaviorSubject, fromEvent, merge } from "rxjs";
+import { map } from "rxjs/operators";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class OfflineService {
   private isOnlineSubject = new BehaviorSubject<boolean>(navigator.onLine);
@@ -15,8 +15,8 @@ export class OfflineService {
 
   private initNetworkStatusDetection(): void {
     // Listen to online/offline events
-    const online$ = fromEvent(window, 'online').pipe(map(() => true));
-    const offline$ = fromEvent(window, 'offline').pipe(map(() => false));
+    const online$ = fromEvent(window, "online").pipe(map(() => true));
+    const offline$ = fromEvent(window, "offline").pipe(map(() => false));
 
     merge(online$, offline$).subscribe((isOnline: boolean) => {
       this.isOnlineSubject.next(isOnline);

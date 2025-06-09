@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, inject } from "@angular/core";
 import { Subject } from "rxjs";
 import { takeUntil } from "rxjs/operators";
+import { ScoreEntry, Scoreboard } from "../../interfaces/game.interface";
 import { ScoreboardService } from "../../services/scoreboard";
-import { ScoreEntry, Scoreboard } from "../../types/game.types";
 
 @Component({
   selector: "app-scoreboard",
@@ -11,10 +11,10 @@ import { ScoreEntry, Scoreboard } from "../../types/game.types";
   standalone: true,
 })
 export class ScoreboardComponent implements OnInit, OnDestroy {
+  private scoreboardService = inject(ScoreboardService);
+
   scoreboard: Scoreboard | null = null;
   private destroy$ = new Subject<void>();
-
-  constructor(private scoreboardService: ScoreboardService) {}
 
   ngOnInit(): void {
     this.scoreboardService.scoreboard$

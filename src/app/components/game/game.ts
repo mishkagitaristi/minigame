@@ -1,8 +1,9 @@
-import { Component, HostListener, OnDestroy, OnInit } from "@angular/core";
-import { Subject } from "rxjs";
-import { takeUntil } from "rxjs/operators";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { fromEvent } from "rxjs";
+import { filter } from "rxjs/operators";
+import { FallingObject, GameState } from "../../interfaces/game.interface";
 import { GameService } from "../../services/game";
-import { FallingObject, GameState } from "../../types/game.types";
 
 @Component({
   selector: "app-game",
@@ -10,48 +11,46 @@ import { FallingObject, GameState } from "../../types/game.types";
   styleUrls: ["./game.scss"],
   standalone: true,
 })
-export class GameComponent implements OnInit, OnDestroy {
-  gameState: GameState | null = null;
-  private destroy$ = new Subject<void>();
+export class GameComponent implements OnInit {
+  private readonly gameService = inject(GameService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private gameService: GameService) {}
+  gameState: GameState | null = null;
 
   ngOnInit(): void {
     this.gameService.gameState$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((state) => {
         this.gameState = state;
       });
-  }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  @HostListener("window:keydown", ["$event"])
-  onKeyDown(event: KeyboardEvent): void {
-    if (!this.gameState?.isGameRunning) return;
-
-    switch (event.key) {
-      case "ArrowLeft":
-      case "a":
-      case "A":
-        event.preventDefault();
-        this.gameService.movePlayer("left");
-        break;
-      case "ArrowRight":
-      case "d":
-      case "D":
-        event.preventDefault();
-        this.gameService.movePlayer("right");
-        break;
-      case " ":
-      case "Escape":
-        event.preventDefault();
-        this.togglePause();
-        break;
-    }
+    // Setup keyboard event handling using RxJS
+    fromEvent<KeyboardEvent>(window, "keydown")
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        filter(() => this.gameState?.isGameRunning ?? false)
+      )
+      .subscribe((event) => {
+        switch (event.key) {
+          case "ArrowLeft":
+          case "a":
+          case "A":
+            event.preventDefault();
+            this.gameService.movePlayer("left");
+            break;
+          case "ArrowRight":
+          case "d":
+          case "D":
+            event.preventDefault();
+            this.gameService.movePlayer("right");
+            break;
+          case " ":
+          case "Escape":
+            event.preventDefault();
+            this.togglePause();
+            break;
+        }
+      });
   }
 
   onStopGame(): void {
@@ -90,5 +89,9 @@ export class GameComponent implements OnInit, OnDestroy {
 
   startGame(): void {
     this.gameService.startGame();
+  }
+
+  isFormValid(): boolean {
+    return this.gameService.isFormValid();
   }
 }

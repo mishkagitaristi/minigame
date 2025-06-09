@@ -95,6 +95,12 @@ Customize your game experience with these configurable options:
 - **Data Persistence**: Scores saved in browser local storage
 - **Reset Option**: Clear all scores with confirmation dialog
 
+### Data Persistence & Privacy
+
+- **Local Storage**: Your top 10 scores and game history are automatically saved in your browser's local storage. This ensures your progress and best scores are kept even if you close or refresh the page.
+- **Privacy**: No data is sent to any server—everything stays on your device.
+- **Reset Option**: You can clear all saved scores at any time using the reset button in the scoreboard panel.
+
 ### Score Calculation
 - Each caught object = 1 point
 - Scores are only saved for completed games (score > 0)

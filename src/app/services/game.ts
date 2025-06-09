@@ -1,21 +1,25 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, interval, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { inject, Injectable } from "@angular/core";
+import { BehaviorSubject, interval, Subject } from "rxjs";
+import { takeUntil } from "rxjs/operators";
 import {
   FallingObject,
   GameBounds,
   GameSettings,
   GameState,
   Player,
-} from '../types/game.types';
-import { OfflineService } from './offline';
-import { ScoreboardService } from './scoreboard';
-import { WebsocketService } from './websocket';
+} from "../interfaces/game.interface";
+import { OfflineService } from "./offline";
+import { ScoreboardService } from "./scoreboard";
+import { WebsocketService } from "./websocket";
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class GameService {
+  private websocketService = inject(WebsocketService);
+  private offlineService = inject(OfflineService);
+  private scoreboardService = inject(ScoreboardService);
+
   private gameLoopDestroy$ = new Subject<void>();
   private objectSpawnDestroy$ = new Subject<void>();
   private timerDestroy$ = new Subject<void>();
@@ -29,7 +33,7 @@ export class GameService {
     isOffline: false,
     pauseReason: null,
     player: {
-      id: 'player',
+      id: "player",
       x: 375,
       y: 550,
       width: 50,
@@ -52,11 +56,7 @@ export class GameService {
   );
   public gameState$ = this.gameStateSubject.asObservable();
 
-  constructor(
-    private websocketService: WebsocketService,
-    private offlineService: OfflineService,
-    private scoreboardService: ScoreboardService
-  ) {
+  constructor() {
     this.initOfflineDetection();
     this.initTabVisibilityDetection();
   }
@@ -94,7 +94,7 @@ export class GameService {
     const currentState = this.gameStateSubject.value;
 
     if (!this.isFormValid()) {
-      console.error('Cannot start game: Form is not valid');
+      console.error("Cannot start game: Form is not valid");
       return;
     }
 
@@ -117,7 +117,7 @@ export class GameService {
     this.startTimer();
     this.websocketService.startUpdates();
 
-    console.log('Game started with settings:', currentState.settings);
+    console.log("Game started with settings:", currentState.settings);
   }
 
   /**
@@ -147,19 +147,19 @@ export class GameService {
       isGameRunning: false,
     });
 
-    console.log('Game stopped. Final score:', currentState.score);
+    console.log("Game stopped. Final score:", currentState.score);
   }
 
   /**
    * Move player left or right
    */
-  movePlayer(direction: 'left' | 'right'): void {
+  movePlayer(direction: "left" | "right"): void {
     const currentState = this.gameStateSubject.value;
 
     if (!currentState.isGameRunning) return;
 
     const newX =
-      direction === 'left'
+      direction === "left"
         ? Math.max(0, currentState.player.x - currentState.player.speed)
         : Math.min(
             this.gameBounds.width - currentState.player.width,
@@ -178,7 +178,7 @@ export class GameService {
   /**
    * Check if form is valid (all fields filled)
    */
-  private isFormValid(): boolean {
+  public isFormValid(): boolean {
     const settings = this.gameStateSubject.value.settings;
     return (
       settings.fallingSpeed > 0 &&
@@ -346,47 +346,6 @@ export class GameService {
   }
 
   /**
-   * Pause the game
-   */
-  pauseGame(reason: 'manual' | 'offline' | 'tab-hidden' = 'manual'): void {
-    const currentState = this.gameStateSubject.value;
-    if (!currentState.isGameRunning || currentState.isPaused) return;
-
-    this.gameStateSubject.next({
-      ...currentState,
-      isPaused: true,
-      pauseReason: reason,
-    });
-
-    // Stop game loops but don't reset the game
-    this.gameLoopDestroy$.next();
-    this.objectSpawnDestroy$.next();
-    this.timerDestroy$.next();
-  }
-
-  /**
-   * Resume the game
-   */
-  resumeGame(forceResume: boolean = false): void {
-    const currentState = this.gameStateSubject.value;
-    if (!currentState.isGameRunning || !currentState.isPaused) return;
-
-    // Only auto-resume if the pause was due to tab visibility or if forced
-    if (!forceResume && currentState.pauseReason === 'manual') return;
-
-    this.gameStateSubject.next({
-      ...currentState,
-      isPaused: false,
-      pauseReason: null,
-    });
-
-    // Restart game loops
-    this.startGameLoop();
-    this.startObjectSpawning();
-    this.startTimer();
-  }
-
-  /**
    * Initialize offline detection and auto-pause functionality
    */
   private initOfflineDetection(): void {
@@ -400,12 +359,12 @@ export class GameService {
 
       // Auto-pause when offline, auto-resume when back online
       if (!isOnline && currentState.isGameRunning && !currentState.isPaused) {
-        this.pauseGame('offline');
+        this.pauseGame("offline");
       } else if (
         isOnline &&
         currentState.isGameRunning &&
         currentState.isPaused &&
-        currentState.pauseReason === 'offline'
+        currentState.pauseReason === "offline"
       ) {
         this.resumeGame();
       }
@@ -416,48 +375,103 @@ export class GameService {
    * Initialize tab visibility detection for auto-pause functionality
    */
   private initTabVisibilityDetection(): void {
-    // Use Page Visibility API to detect tab changes
-    document.addEventListener('visibilitychange', () => {
-      const currentState = this.gameStateSubject.value;
+    // Helper to get current state
+    const getState = () => this.gameStateSubject.value;
 
-      if (document.hidden) {
-        // Tab became hidden - auto pause if game is running and not already paused
-        if (currentState.isGameRunning && !currentState.isPaused) {
-          this.pauseGame('tab-hidden');
-          console.log('Game auto-paused: Tab hidden');
-        }
-      } else {
-        // Tab became visible - auto resume if paused due to tab visibility
-        if (
-          currentState.isGameRunning &&
-          currentState.isPaused &&
-          currentState.pauseReason === 'tab-hidden'
-        ) {
-          this.resumeGame();
-          console.log('Game auto-resumed: Tab visible');
-        }
+    // Pause if hidden or blurred
+    const tryPause = () => {
+      const state = getState();
+      if (state.isGameRunning && !state.isPaused && !state.isOffline) {
+        this.pauseGame("tab-hidden");
+        console.log("Game auto-paused: Tab hidden/blurred");
       }
-    });
+    };
 
-    // Also listen for window focus/blur as fallback for older browsers
-    window.addEventListener('blur', () => {
-      const currentState = this.gameStateSubject.value;
-      if (currentState.isGameRunning && !currentState.isPaused) {
-        this.pauseGame('tab-hidden');
-        console.log('Game auto-paused: Window lost focus');
-      }
-    });
-
-    window.addEventListener('focus', () => {
-      const currentState = this.gameStateSubject.value;
+    // Resume if visible or focused and was paused due to tab
+    const tryResume = () => {
+      const state = getState();
       if (
-        currentState.isGameRunning &&
-        currentState.isPaused &&
-        currentState.pauseReason === 'tab-hidden'
+        state.isGameRunning &&
+        state.isPaused &&
+        state.pauseReason === "tab-hidden" &&
+        !state.isOffline
       ) {
         this.resumeGame();
-        console.log('Game auto-resumed: Window gained focus');
+        console.log("Game auto-resumed: Tab visible/focused");
+      }
+    };
+
+    // Page Visibility API
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        tryPause();
+      } else {
+        // Add a small delay to ensure the tab is fully visible
+        setTimeout(tryResume, 100);
       }
     });
+
+    // Window blur/focus
+    window.addEventListener("blur", tryPause);
+    window.addEventListener("focus", () => {
+      // Add a small delay to ensure the window is fully focused
+      setTimeout(tryResume, 100);
+    });
+
+    // Handle page unload
+    window.addEventListener("beforeunload", () => {
+      const state = getState();
+      if (state.isGameRunning && !state.isPaused) {
+        this.pauseGame("tab-hidden");
+      }
+    });
+  }
+
+  /**
+   * Pause the game
+   */
+  pauseGame(reason: "manual" | "offline" | "tab-hidden" = "manual"): void {
+    const currentState = this.gameStateSubject.value;
+    if (!currentState.isGameRunning || currentState.isPaused) return;
+
+    // Stop game loops but don't reset the game
+    this.gameLoopDestroy$.next();
+    this.objectSpawnDestroy$.next();
+    this.timerDestroy$.next();
+
+    this.gameStateSubject.next({
+      ...currentState,
+      isPaused: true,
+      pauseReason: reason,
+    });
+
+    console.log(`Game paused: ${reason}`);
+  }
+
+  /**
+   * Resume the game
+   */
+  resumeGame(forceResume: boolean = false): void {
+    const currentState = this.gameStateSubject.value;
+    if (!currentState.isGameRunning || !currentState.isPaused) return;
+
+    // Only auto-resume if the pause was due to tab visibility or if forced
+    if (!forceResume && currentState.pauseReason === "manual") return;
+
+    // Don't resume if offline
+    if (currentState.isOffline) return;
+
+    // Restart game loops
+    this.startGameLoop();
+    this.startObjectSpawning();
+    this.startTimer();
+
+    this.gameStateSubject.next({
+      ...currentState,
+      isPaused: false,
+      pauseReason: null,
+    });
+
+    console.log("Game resumed");
   }
 }
